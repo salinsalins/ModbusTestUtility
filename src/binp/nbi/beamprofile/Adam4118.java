@@ -3,19 +3,21 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package modbusteatutility;
+package binp.nbi.beamprofile;
+
+import java.io.File;
 
 /**
  *
  * @author sanin
  */
-public class ModbusTeatUtility {
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        // TODO code application logic here
+public class Adam4118 {
+    int port;
+    int addr;
+    File file;
+    
+    Adam4118() {
+        
     }
     
 }

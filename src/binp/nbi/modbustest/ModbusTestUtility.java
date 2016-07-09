@@ -5,46 +5,17 @@
 
 package binp.nbi.modbustest;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
+import binp.nbi.beamprofile.PET7015;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
-import java.util.Timer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JPanel;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingWorker;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.xy.XYSeriesCollection;
-import org.jfree.ui.RectangleInsets;
-
-import binp.nbi.tango.util.datafile.DataFile;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Arrays;
-import jssc.SerialPort;
-import jssc.SerialPortList;
 import java.net.*;
-import java.io.*;
 import java.util.Date;
 import javax.swing.SpinnerListModel;
 import net.wimpi.modbus.*;
@@ -53,7 +24,8 @@ import net.wimpi.modbus.io.*;
 import net.wimpi.modbus.net.*;
 import net.wimpi.modbus.procimg.InputRegister;
 import net.wimpi.modbus.util.*;
-import static net.wimpi.modbus.util.ModbusUtil.toHex;
+import net.wimpi.modbus.procimg.SimpleRegister;
+
  
 
 public class ModbusTestUtility extends javax.swing.JFrame implements WindowListener {
@@ -150,6 +122,12 @@ public class ModbusTestUtility extends javax.swing.JFrame implements WindowListe
         jLabel5.setText("Count:");
 
         jSpinner5.setModel(new javax.swing.SpinnerListModel(new String[] {"(0x01)  - Read Coil Status", "(0x02) - Read Discrete Inputs", "(0x03) - Read Holding Registers", "(0x04) - Read Input Registers", "(0x05) - Force Single Coil", "(0x06) - Preset Single Register", "(0x0F) - Force Multiple Coils", "(0x10) - Preset Multiple Registers"}));
+        jSpinner5.setAutoscrolls(true);
+        jSpinner5.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                jSpinner5StateChanged(evt);
+            }
+        });
 
         jLabel7.setText("Referece:");
 
@@ -168,14 +146,14 @@ public class ModbusTestUtility extends javax.swing.JFrame implements WindowListe
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(org.jdesktop.layout.GroupLayout.TRAILING, jScrollPane5, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 425, Short.MAX_VALUE)
+            .add(org.jdesktop.layout.GroupLayout.TRAILING, jScrollPane5, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 211, Short.MAX_VALUE)
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jScrollPane5, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 117, Short.MAX_VALUE)
+            .add(jScrollPane5)
         );
 
-        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder("Errors"));
+        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder("Log"));
 
         jTextArea2.setColumns(20);
         jTextArea2.setFont(new java.awt.Font("Courier New", 0, 12)); // NOI18N
@@ -211,13 +189,11 @@ public class ModbusTestUtility extends javax.swing.JFrame implements WindowListe
         jPanel6.setLayout(jPanel6Layout);
         jPanel6Layout.setHorizontalGroup(
             jPanel6Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jPanel6Layout.createSequentialGroup()
-                .add(jScrollPane3, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 425, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .add(0, 4, Short.MAX_VALUE))
+            .add(jScrollPane3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 196, Short.MAX_VALUE)
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jScrollPane3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 101, Short.MAX_VALUE)
+            .add(jScrollPane3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 247, Short.MAX_VALUE)
         );
 
         buttonGroup1.add(jRadioButton2);
@@ -246,8 +222,10 @@ public class ModbusTestUtility extends javax.swing.JFrame implements WindowListe
                 .add(0, 0, Short.MAX_VALUE)
                 .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(jPanel5, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(jPanel4, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(jPanel6, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                    .add(jPanel1Layout.createSequentialGroup()
+                        .add(jPanel6, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                        .add(jPanel4, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))))
             .add(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -268,12 +246,12 @@ public class ModbusTestUtility extends javax.swing.JFrame implements WindowListe
                             .add(jPanel1Layout.createSequentialGroup()
                                 .add(jLabel4)
                                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(jSpinner3, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 58, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                .add(18, 18, 18)
+                                .add(jSpinner3, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 64, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
                                 .add(jLabel7)
                                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(jSpinner6, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 97, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                                .add(jSpinner6, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 78, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .add(31, 31, 31)
                                 .add(jLabel5)
                                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                                 .add(jSpinner4, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 58, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
@@ -296,7 +274,7 @@ public class ModbusTestUtility extends javax.swing.JFrame implements WindowListe
                             .add(jPanel1Layout.createSequentialGroup()
                                 .add(jLabel3)
                                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                                .add(jSpinner5, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 184, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                .add(jSpinner5, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 217, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .add(jButton1)))
                         .addContainerGap())))
@@ -305,13 +283,14 @@ public class ModbusTestUtility extends javax.swing.JFrame implements WindowListe
             jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jPanel1Layout.createSequentialGroup()
                 .add(0, 0, Short.MAX_VALUE)
-                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(jLabel6)
-                    .add(jComboBox1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(jLabel1)
-                    .add(jSpinner1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(jButton2)
-                    .add(jRadioButton1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 27, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(jRadioButton1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 27, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                        .add(jLabel6)
+                        .add(jComboBox1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .add(jLabel1)
+                        .add(jSpinner1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
                 .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(jLabel4)
@@ -333,10 +312,13 @@ public class ModbusTestUtility extends javax.swing.JFrame implements WindowListe
                     .add(jLabel8)
                     .add(jRadioButton4)
                     .add(jRadioButton5))
-                .add(3, 3, 3)
-                .add(jPanel6, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(jPanel4, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
+                    .add(jPanel1Layout.createSequentialGroup()
+                        .add(3, 3, 3)
+                        .add(jPanel6, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(jPanel4, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(jPanel5, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
         );
@@ -367,18 +349,33 @@ public class ModbusTestUtility extends javax.swing.JFrame implements WindowListe
             String fs = (String) jSpinner5.getValue();
             List fl = ((SpinnerListModel) jSpinner5.getModel()).getList();
             int index = fl.indexOf(fs);
-            //System.out.println("index "+index);
-
-            //3. Prepare the request
-            if( index == 0)
-                req = new ReadCoilsRequest(ref, count);
-            if( index == 1)
-                req = new ReadInputDiscretesRequest(ref, count);
-            if( index == 2)
-                req = new ReadMultipleRegistersRequest(ref, count);
-            if( index == 3)
-                req = new ReadInputRegistersRequest(ref, count);
-
+            switch(index) {
+                case 0:
+                    req = new ReadCoilsRequest(ref, count);
+                    break;
+                case 1:
+                    req = new ReadInputDiscretesRequest(ref, count);
+                    break;
+                case 2:
+                    req = new ReadMultipleRegistersRequest(ref, count);
+                    break;
+                case 3:
+                    req = new ReadInputRegistersRequest(ref, count);
+                    break;
+                case 4:
+                    req = new WriteCoilRequest(ref, count!=0);
+                    break;
+                case 5:
+                    req = new WriteSingleRegisterRequest(ref, new SimpleRegister(count));
+                    break;
+                case 6:
+                    req = new WriteMultipleCoilsRequest(ref, count);
+                    break;
+                case 7:
+                    req = new WriteMultipleRegistersRequest(ref, new SimpleRegister[count]);
+                    break;
+                default:
+            }
             req.setUnitID(unitid);
 
             //4. Prepare the transaction
@@ -389,7 +386,7 @@ public class ModbusTestUtility extends javax.swing.JFrame implements WindowListe
             trans.execute();
 
             if( index == 0)
-                res = (ReadCoilsResponse)trans.getResponse();
+                res = (ReadCoilsResponse) trans.getResponse();
             if( index == 1)
                 res = (ReadInputDiscretesResponse) trans.getResponse();
             if( index == 2)
@@ -407,7 +404,7 @@ public class ModbusTestUtility extends javax.swing.JFrame implements WindowListe
             String hexMessage = res.getHexMessage();
             for(int i = 0; i < hexMessage.length(); i++) {
                 jTextArea3.append(hexMessage.substring(i, i+1));
-                if((i % 48) == 47)
+                if((i % 24) == 23)
                     jTextArea3.append("\n");
             }
             jTextArea3.append("\n");
@@ -445,6 +442,12 @@ public class ModbusTestUtility extends javax.swing.JFrame implements WindowListe
                 }
             }
             jTextArea3.append("\n");
+            
+            try {
+                PET7015 pet = new PET7015("addr.getHostAddress()", port);
+            } catch(Exception e) {
+            }
+            
         } catch (Exception ex) {
             jTextArea3.setText("- Error -");
             jTextArea2.setText("Exception " + ex);
@@ -456,20 +459,46 @@ public class ModbusTestUtility extends javax.swing.JFrame implements WindowListe
         // Open the connection
         try {
             //addr = InetAddress.getByName("192.168.1.202");
+            jTextArea2.setText("");
             addr = InetAddress.getByName((String) jComboBox1.getSelectedItem());
             con = new TCPMasterConnection(addr);
             port = (int) jSpinner1.getValue();
             con.setPort(port);
             con.connect();
+            System.out.println("Connected to " + addr.toString() + ":" + con.getPort());
+            jTextArea2.append("Connected to " + addr.toString() + ":" + con.getPort());
             jRadioButton1.setSelected(true);
         } catch (UnknownHostException ex) {
             jRadioButton1.setSelected(false);
             logger.log(Level.WARNING, "Unknown Host Exception", ex);
+            jTextArea2.append("Unknown Host Exception " + ex);
         } catch (Exception ex) {
             jRadioButton1.setSelected(false);
+            jTextArea2.append("Connection Error " + ex);
             logger.log(Level.WARNING, "Connection Error", ex);
         }
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jSpinner5StateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSpinner5StateChanged
+        String fs = (String) jSpinner5.getValue();
+        List fl = ((SpinnerListModel) jSpinner5.getModel()).getList();
+        int index = fl.indexOf(fs);
+            switch(index) {
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 6:
+                case 7:
+                    jLabel5.setText("Count:");
+                    break;
+                case 4:
+                case 5:
+                    jLabel5.setText("Value:");
+                    break;
+                default:
+            }
+    }//GEN-LAST:event_jSpinner5StateChanged
     
     private static Date lastDate = new Date();
     public void mark() {

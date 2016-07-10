@@ -5,7 +5,7 @@
 
 package binp.nbi.modbustest;
 
-import binp.nbi.beamprofile.PET7015;
+import binp.nbi.PET7000.PET7015;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
@@ -43,6 +43,8 @@ public class ModbusTestUtility extends javax.swing.JFrame implements WindowListe
     //ReadInputDiscretesResponse res = null; //the response
     ModbusRequest req = null;
     ModbusResponse res = null;
+    
+    PET7015 pet = null;
 
     public ModbusTestUtility() {
         initComponents();
@@ -443,10 +445,10 @@ public class ModbusTestUtility extends javax.swing.JFrame implements WindowListe
             }
             jTextArea3.append("\n");
             
-            try {
-                PET7015 pet = new PET7015("addr.getHostAddress()", port);
-            } catch(Exception e) {
-            }
+            int c = jRadioButton3.isSelected()?1:2;
+            if(pet == null) pet = new PET7015(addr.getHostAddress(), port, c);
+            pet.read();
+            pet.closeConnection();
             
         } catch (Exception ex) {
             jTextArea3.setText("- Error -");
